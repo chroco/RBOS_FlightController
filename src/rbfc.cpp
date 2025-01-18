@@ -53,7 +53,14 @@ void RbosDrone::do_things()
 	accel.acc_pitch = mpu6050.getAccAngleY();
 
 	// get input values from controller
-	flysky.printPulse();
+//*
+	flyskydata_t flyskydata = {0};
+	flysky.getPulseTimes(&flyskydata);
+	flysky.printPulses(&flyskydata);
+//*/
+//
+	k_msleep(1);
+	//flysky.printPulses();
 	
 	// correct controller values
 	

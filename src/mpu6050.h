@@ -4,9 +4,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
+#include <zephyr/timing/timing.h>
 #include <stdio.h>
 #include <math.h>
-#include <zephyr/timing/timing.h>
 
 #define MPU6050_ADDR         0x68
 #define MPU6050_SMPLRT_DIV   0x19

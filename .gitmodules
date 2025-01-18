@@ -1,0 +1,3 @@
+[submodule "ext/flysky_fs16x"]
+	path = ext/flysky_fs16x
+	url = https://github.com/chroco/flysky_fs16x.git

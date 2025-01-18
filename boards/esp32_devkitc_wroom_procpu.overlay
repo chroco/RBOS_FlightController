@@ -8,6 +8,8 @@
 		receiver1 = &receiver1;
 		receiver2 = &receiver2;
 		receiver3 = &receiver3;
+		receiver4 = &receiver4;
+		receiver5 = &receiver5;
 	};
 
 	pwm_loopback_0 {
@@ -20,7 +22,8 @@
 	leds {
 		compatible = "gpio-leds";
 		led0: led_0 {
-			gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+			//gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
 			label = "LED 0";
 		};
 	};
@@ -29,14 +32,14 @@
 		compatible = "gpio-keys";
 
 		receiver0: receiver_0 {
-			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>; // pin 36
+			gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>; // pin 39
       zephyr,code = <INPUT_KEY_0>;
 			label = "Receiver 0";
 		};
 
 		receiver1: receiver_1 {
 			gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>; // pint 35
-      //zephyr,code = <INPUT_KEY_1>;
+      zephyr,code = <INPUT_KEY_1>;
 			label = "Receiver 1";
 		};
 
@@ -47,8 +50,20 @@
 		};
 
 		receiver3: receiver_3 {
-			gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>; // pin 39
+			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>; // pin 36
       zephyr,code = <INPUT_KEY_3>;
+			label = "Receiver 3";
+		};
+
+		receiver4: receiver_4 {
+			gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>; // pin 33
+      zephyr,code = <INPUT_KEY_4>;
+			label = "Receiver 3";
+		};
+
+		receiver5: receiver_5 {
+			gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>; // pin 32
+      zephyr,code = <INPUT_KEY_5>;
 			label = "Receiver 3";
 		};
 	};
@@ -79,17 +94,18 @@
 			max-pulse = <PWM_USEC(4000)>;
 		};
 	};
-
 };
 
 &pinctrl {
 	mcpwm0_default: mcpwm0_default {
 		group1 {
 			pinmux = <MCPWM0_OUT0A_GPIO2>;
-			output-enable;
+			input-enable;
 		};
 		group2 {
-			pinmux = <MCPWM0_CAP0_GPIO4>;
+			pinmux = <MCPWM0_CAP0_GPIO36>;
+			//pinmux = <MCPWM0_CAP0_GPIO2>;
+			output-enable;
 		};
 	};
 };

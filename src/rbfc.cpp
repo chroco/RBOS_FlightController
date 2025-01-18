@@ -1,13 +1,16 @@
 #include "rbfc.h"
 #include "mpu6050.h"
 
+
 RbosDrone::RbosDrone() :
-	flysky(FlySky()),	
+	//flysky(FlySky()),	
 	mpu6050(),
 	gyro{0},
 	accel{0},
 	pidcontrol{0}
 {
+	k_mutex_init(&flysky_mutex);
+
   pidcontrol.pGain[1] = 2.0;
   pidcontrol.iGain[1] = 0.02;
   pidcontrol.dGain[1] = 18.0;
@@ -53,8 +56,8 @@ void RbosDrone::do_things()
 	accel.acc_pitch = mpu6050.getAccAngleY();
 
 	// get input values from controller
-	flysky.printPulse();
-	
+	flysky.printPulses(&flysky_data);
+
 	// correct controller values
 	
 	// calculate P(ID)
@@ -62,12 +65,30 @@ void RbosDrone::do_things()
 
 }
 
+FlySky RbosDrone::flysky = FlySky();
+flysky_data_t RbosDrone::flysky_data = {0};
+
+void RbosDrone::skyfly_work_handler(k_work *work)
+{
+	flysky.capturePulses(&flysky_data);
+}
+
+K_WORK_DEFINE(skyfly_work, RbosDrone::skyfly_work_handler);
+
+void RbosDrone::skyfly_timer_handler(k_timer *dummy)
+{
+  k_work_submit(&skyfly_work);
+}
+
+K_TIMER_DEFINE(skyfly_timer, RbosDrone::skyfly_timer_handler, NULL);
+
 void RbosDrone::init()
 {
 	mpu6050.begin();
   mpu6050.calcGyroOffsets(true);// TODO: figure out what this does
   gyro.refNose = gyro.angleZ;
 
+	k_timer_start(&skyfly_timer, K_MSEC(FLYSKY_SAMPLE_TIME_MS), K_MSEC(FLYSKY_SAMPLE_TIME_MS));
 	///Baro Setup
 
   ///PID Gain Presets

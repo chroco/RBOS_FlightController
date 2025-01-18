@@ -6,6 +6,8 @@
 #include <zephyr/drivers/pwm.h>
 #include "flysky_fs16x.h"
 
+#define FLYSKY_SAMPLE_TIME_MS 4
+
 struct gyro_t {
 	double angleX;
 	double angleY;
@@ -47,10 +49,16 @@ class RbosDrone
 		void init();
 		void printImuData(void);
 		void do_things();
+		
+		static void my_work_handler(k_work *);
+		static void my_timer_handler(k_timer *);
 	private:
 		int receiver_input[5];
 		int corrected_input[5];
-		FlySky flysky;
+		static FlySky flysky;
+		static flysky_data_t flysky_data;
+
+		k_mutex flysky_mutex;
 
 		MPU6050 mpu6050;
 		

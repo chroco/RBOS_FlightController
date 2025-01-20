@@ -22,9 +22,9 @@ int main(void)
 
 	while(1)
 	{
-		rbosDrone.do_things();
+		//rbosDrone.do_things();
 		
-		k_msleep(50);
+		k_msleep(1000);
 	}
 
 	return 0;

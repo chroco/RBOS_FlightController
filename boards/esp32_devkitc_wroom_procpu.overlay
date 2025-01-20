@@ -10,6 +10,7 @@
 		receiver3 = &receiver3;
 		receiver4 = &receiver4;
 		receiver5 = &receiver5;
+		gnss = &gnss;
 	};
 
 	pwm_loopback_0 {
@@ -93,6 +94,18 @@
 			min-pulse = <PWM_USEC(1000)>;
 			max-pulse = <PWM_USEC(4000)>;
 		};
+	};
+};
+
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+
+	//u_blox_m8: u-blox,m8 {
+	gnss: u-blox,m8 {
+		status = "okay";
+		compatible = "u-blox,m8";
+		uart-baudrate = <115200>;
 	};
 };
 

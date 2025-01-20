@@ -17,7 +17,7 @@ ARGS= --port $(PORT) --chip auto --baud $(BAUD) --before default_reset --after h
 .PHONY: all write mcuboot clean
 
 all: clean
-	@west build -b $(BOARD) --sysbuild .
+	@west build -b $(BOARD) . # --sysbuild .
 
 write: erase
 	@west flash --runner esp32 

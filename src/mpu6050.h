@@ -8,21 +8,18 @@
 #include <stdio.h>
 #include <math.h>
 
-#define MPU6050_ADDR         0x68
-#define MPU6050_SMPLRT_DIV   0x19
-#define MPU6050_CONFIG       0x1a
-#define MPU6050_GYRO_CONFIG  0x1b
-#define MPU6050_ACCEL_CONFIG 0x1c
-#define MPU6050_WHO_AM_I     0x75
-#define MPU6050_PWR_MGMT_1   0x6b
-#define MPU6050_TEMP_H       0x41
-#define MPU6050_TEMP_L       0x42
-
 #define SENSOR_ARRAY_SIZE 3
 #define PI 3.14159265358979323846
 
 typedef struct sensor_value sensor_value_t;
 typedef uint8_t byte;
+
+struct raw_imu_data_t
+{
+	sensor_value_t temperature;
+	sensor_value_t accel[SENSOR_ARRAY_SIZE];
+	sensor_value_t gyro[SENSOR_ARRAY_SIZE];
+};
 
 class MPU6050{
   public:
@@ -36,11 +33,10 @@ class MPU6050{
 		int printImuData(void);
 		int getImuData(sensor_value_t  *, sensor_value_t *, sensor_value_t *, int);
 
+		void update();
+		
 		void setGyroOffsets(double x, double y, double z);
 		double getYawOffset(){ return gyroZoffset;}
-
-		void writeMPU6050(byte reg, byte data);
-		byte readMPU6050(byte reg);
 
 		int16_t getRawAccX(){ return rawAccX; };
 		int16_t getRawAccY(){ return rawAccY; };
@@ -68,8 +64,6 @@ class MPU6050{
 		double getGyroYoffset(){ return gyroYoffset; };
 		double getGyroZoffset(){ return gyroZoffset; };
 
-		void update();
-
 		double getAccAngleX(){ return angleAccX; };
 		double getAccAngleY(){ return angleAccY; };
 
@@ -86,8 +80,11 @@ class MPU6050{
 		static sensor_value_t temperature;
 		static sensor_value_t accel[SENSOR_ARRAY_SIZE];
 		static sensor_value_t gyro[SENSOR_ARRAY_SIZE];
-
+		
 		const struct device *const mpu6050;
+
+		void captureRaw(raw_imu_data_t *);
+		void conditionRaw(raw_imu_data_t *);
 
 		int startTriggeredImu(void);
 		static void handle_mpu6050_drdy(const struct device *, const struct sensor_trigger *);

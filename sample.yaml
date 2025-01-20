@@ -1,3 +1,4 @@
+
 sample:
   name: I2C custom target sample
 tests:
@@ -6,3 +7,12 @@ tests:
     platform_allow:
       - lpcxpresso55s69/lpc55s69/cpu0
     harness: TBD
+  sample.basic.servo_motor:
+    tags:
+      - drivers
+      - pwm
+    depends_on: pwm
+    harness: motor
+    filter: dt_compat_enabled("pwm-servo")
+    integration_platforms:
+      - bbc_microbit

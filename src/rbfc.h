@@ -10,6 +10,7 @@
 #include <zephyr/drivers/pwm.h>
 
 #define FLYSKY_SAMPLE_TIME_MS		4
+#define BMP390_SAMPLE_TIME_MS		5
 #define DRONE_SAMPLE_TIME_MS		50
 //#define GNSS_MODEM DEVICE_DT_GET(DT_ALIAS(gnss))
 
@@ -83,6 +84,9 @@ class RbosDrone
 		static void drone_work_handler(k_work *);
 		static void drone_timer_handler(k_timer *);
 		
+		static void bmp390_work_handler(k_work *);
+		static void bmp390_timer_handler(k_timer *);
+		
 		static void gnss_data_cb(const device *, const gnss_data *);
 		static void gnss_satellites_cb(const device *, const gnss_satellite *, uint16_t);
 		const motor_t *getFrontRight(void);
@@ -90,12 +94,15 @@ class RbosDrone
 		const motor_t *getBackLeft(void);
 		const motor_t *getFrontLeft(void);
 	private:
-//*
 		static const motor_t front_right;	
 		static const motor_t back_right;
 		static const motor_t back_left;
 		static const motor_t front_left;
-//*/
+	
+		static const device *bmp390;
+		static sensor_value pressure;
+		void capturePressure(sensor_value *);
+
 		int startTriggeredBmp390(void);
 		static void handle_bmp390_drdy(const struct device *, const struct sensor_trigger *);
 		static int process_bmp390(const struct device *);
@@ -108,6 +115,7 @@ class RbosDrone
 		static gnss_satellite satellites;
 
 		k_mutex gnss_mutex;
+		k_mutex pressure_mutex;
 
 		MPU6050 mpu6050;
 		

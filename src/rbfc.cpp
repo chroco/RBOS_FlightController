@@ -9,6 +9,9 @@ flysky_data_t RbosDrone::flysky_data = {0};
 navigation_data RbosDrone::nav_data = {0};	
 gnss_satellite RbosDrone::satellites = {0};
 
+const device *RbosDrone::bmp390 = DEVICE_DT_GET_ONE(bosch_bmp390);;
+sensor_value RbosDrone::pressure = {0};;
+
 RbosDrone::RbosDrone() :
 	mpu6050(MPU6050()),
 	gyro{0},
@@ -18,6 +21,7 @@ RbosDrone::RbosDrone() :
 	pThis = this;
 
 	k_mutex_init(&gnss_mutex);
+	k_mutex_init(&pressure_mutex);
 
 //*
   pidcontrol.pGain[roll] = 2.0;
@@ -122,6 +126,26 @@ void RbosDrone::flysky_timer_handler(k_timer *dummy)
 
 K_TIMER_DEFINE(flysky_timer, RbosDrone::flysky_timer_handler, NULL);
 
+void RbosDrone::bmp390_work_handler(k_work *work)
+{
+	int rc = sensor_sample_fetch(bmp390);
+
+	if (rc == 0) 
+	{
+		rc = sensor_channel_get(bmp390, SENSOR_CHAN_PRESS, &pressure);
+	}
+}
+
+K_WORK_DEFINE(bmp390_work, RbosDrone::bmp390_work_handler);
+
+void RbosDrone::bmp390_timer_handler(k_timer *dummy)
+{
+  k_work_submit(&bmp390_work);
+}
+
+K_TIMER_DEFINE(bmp390_timer, RbosDrone::bmp390_timer_handler, NULL);
+
+
 void RbosDrone::drone_work_handler(k_work *work)
 {
 	pThis->doDroneThings();
@@ -139,6 +163,7 @@ K_TIMER_DEFINE(drone_timer, RbosDrone::drone_timer_handler, NULL);
 void RbosDrone::startWorkers(void)
 {
 	k_timer_start(&flysky_timer, K_MSEC(FLYSKY_SAMPLE_TIME_MS), K_MSEC(FLYSKY_SAMPLE_TIME_MS));
+	k_timer_start(&bmp390_timer, K_MSEC(BMP390_SAMPLE_TIME_MS), K_MSEC(BMP390_SAMPLE_TIME_MS));
 	k_timer_start(&drone_timer, K_MSEC(DRONE_SAMPLE_TIME_MS), K_MSEC(DRONE_SAMPLE_TIME_MS));
 }
 
@@ -207,13 +232,6 @@ void RbosDrone::gnssInit(void)
 //*/
 }
 
-
-/*
-static const struct pwm_dt_spec servo = PWM_DT_SPEC_GET(DT_NODELABEL(servo0));
-static const uint32_t min_pulse = DT_PROP(DT_NODELABEL(servo0), min_pulse);
-static const uint32_t max_pulse = DT_PROP(DT_NODELABEL(servo0), max_pulse);
-//*/
-
 const motor_t RbosDrone::front_right = {
 	PWM_DT_SPEC_GET(DT_NODELABEL(servo0)),
 	DT_PROP(DT_NODELABEL(servo0), min_pulse),
@@ -268,10 +286,8 @@ void RbosDrone::init()
 	
 	startWorkers();
 
-	//pwm_set_pulse_dt(&servo0, 500000000);
-	
 	///Baro Setup
-	//startTriggeredBmp390();
+	startTriggeredBmp390();
   
 	///PID Gain Presets
 
@@ -281,7 +297,16 @@ void RbosDrone::init()
 
 void RbosDrone::updateMotors(void)
 {
+//*
+	const uint64_t motor_pulse_time_ns = 1000 * flysky_data.throttle_pulse_time_us;
 
+	pwm_set_pulse_dt(&getFrontRight()->servo, motor_pulse_time_ns);
+	pwm_set_pulse_dt(&getBackRight()->servo, motor_pulse_time_ns);
+	pwm_set_pulse_dt(&getBackLeft()->servo, motor_pulse_time_ns);
+	pwm_set_pulse_dt(&getFrontLeft()->servo, motor_pulse_time_ns);
+	
+	printf(" {%llu} ", motor_pulse_time_ns);
+//*/
 }
 
 void RbosDrone::doImuThings(void)
@@ -315,31 +340,13 @@ void RbosDrone::calculatePID(void)
 	
 }
 
-//const struct device *const bmp390 = DEVICE_DT_GET_ONE(bosch_bmp390);
-
 void RbosDrone::doDroneThings()
 {
 	// update motors from last run
 	// loop count 0
-	updateMotors(); 
 
 	// get imu data	
 	doImuThings();
-//*
-	const uint64_t motor_pulse_time_us = 10000 * flysky_data.throttle_pulse_time_us;
-
-	pwm_set_pulse_dt(&getFrontRight()->servo, motor_pulse_time_us);
-	pwm_set_pulse_dt(&getBackRight()->servo, motor_pulse_time_us);
-	pwm_set_pulse_dt(&getBackLeft()->servo, motor_pulse_time_us);
-	pwm_set_pulse_dt(&getFrontLeft()->servo, motor_pulse_time_us);
-//*/
-/*
-	pwm_set_pulse_dt(&getFrontRight()->servo, getFrontRight()->max_pulse);
-	pwm_set_pulse_dt(&getBackRight()->servo, getBackRight()->max_pulse);
-	pwm_set_pulse_dt(&getBackLeft()->servo, getBackLeft()->max_pulse);
-	pwm_set_pulse_dt(&getFrontLeft()->servo, getFrontLeft()->max_pulse);
-//*/
-
 //doGnssThings();
 
 	// get input values from controller
@@ -347,11 +354,97 @@ void RbosDrone::doDroneThings()
 	doFlySkyThings();
 
 	// correct controller values
-	
+	sensor_value captured_pressure = {0};
+	capturePressure(&captured_pressure);
+	printf(" (%u.%u kPa) ", captured_pressure.val1, captured_pressure.val2);
 	// calculate P(ID)
 	calculatePID();
 	// if loop time >= 4ms go into next then calculate stuff for next loop
+	//
+	updateMotors(); 
+}
 
+void RbosDrone::capturePressure(sensor_value *p_pressure)
+{
+	k_mutex_lock(&pressure_mutex, K_FOREVER);
+	memcpy(p_pressure, &pressure, sizeof(sensor_value));	
+	k_mutex_unlock(&pressure_mutex);
+}
+
+int RbosDrone::process_bmp390(const struct device *dev)
+{
+//*
+	//struct sensor_value pressure;
+	int rc = sensor_sample_fetch(dev);
+
+	if (rc == 0) 
+	{
+		rc = sensor_channel_get(dev, SENSOR_CHAN_PRESS, &pressure);
+	}
+	//printf(".");
+	//printf("pressure: %u.%u kPa\n", pressure.val1, pressure.val2);
+//*/
+	//return 0;
+	return rc;
+}
+
+static struct sensor_trigger trigger;
+
+void RbosDrone::handle_bmp390_drdy(const struct device *dev, const struct sensor_trigger *trig)
+{
+//*
+	int rc = process_bmp390(dev);
+	
+	if (rc != 0) 
+	{
+		//printf("\n(%d)\n",rc);
+		//printf("failure detected: %d\n", rc);
+		//(void)sensor_trigger_set(dev, trig, NULL);
+		//(void)sensor_trigger_set(dev, trig, handle_mpu6050_drdy);
+	}
+//*/
+}
+
+int RbosDrone::startTriggeredBmp390(void)
+{
+//*
+	int ret = device_is_ready(bmp390);
+	while (!ret) 
+	//while (!device_is_ready(bmp390)) 
+	{
+		printf("Device %s is not ready: %d\n", bmp390->name, ret);
+		k_msleep(1000);
+		ret = device_is_ready(bmp390);
+	}
+//*/
+/*
+	if(!device_is_ready(bmp390)) 
+	{
+		printf("Device %s is not ready\n", bmp390->name);
+	//	k_msleep(1000);
+	}
+//*/
+
+/*
+	trigger = (struct sensor_trigger)
+	{
+		.type = SENSOR_TRIG_DATA_READY,
+		.chan = SENSOR_CHAN_ALL,
+	};
+
+	//int ret = sensor_trigger_set(bmp390, &trigger, handle_bmp390_drdy);
+	ret = sensor_trigger_set(bmp390, &trigger, handle_bmp390_drdy);
+	__ASSERT(ret >= 0, "ERROR %d:Cannot configure trigger!", ret);
+	if(ret < 0)
+	{
+		printf("\nERROR %d:Cannot configure trigger!", ret);
+	}
+
+	printk("Configured for triggered sampling.\n");
+
+	// triggered runs with its own thread after exit 
+//*/
+	return 0;
 }
 
 int RbosDrone::process_bmp390(const struct device *dev)
@@ -427,5 +520,4 @@ int RbosDrone::startTriggeredBmp390(void)
 //*/
 	return 0;
 }
-
 

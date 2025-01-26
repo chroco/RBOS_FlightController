@@ -57,13 +57,13 @@
 		receiver4: receiver_4 {
 			gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>; // pin 33
       zephyr,code = <INPUT_KEY_4>;
-			label = "Receiver 3";
+			label = "Receiver 4";
 		};
 
 		receiver5: receiver_5 {
 			gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>; // pin 32
       zephyr,code = <INPUT_KEY_5>;
-			label = "Receiver 3";
+			label = "Receiver 5";
 		};
 	};
 

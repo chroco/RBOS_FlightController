@@ -2,15 +2,15 @@
 #define _RBFC_H_
 
 #include <stdio.h>
-#include <zephyr/drivers/gnss.h>
+//#include <zephyr/drivers/gnss.h>
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/pwm.h>
-#include <zephyr/logging/log.h>
+//#include <zephyr/logging/log.h>
 
 #include "mpu6050.h"
 #include "flysky_fs16x.h"
-#include "zsdcard.h"
+//#include "zsdcard.h"
 
 #define FLYSKY_SAMPLE_TIME_MS		4
 #define BMP390_SAMPLE_TIME_MS		5
@@ -79,26 +79,26 @@ class RbosDrone
 
 		void init();
 		void printImuData(void);
-		navigation_data *getNavigationData(void);
-		
+		//navigation_data *getNavigationData(void);
 		static void flysky_work_handler(k_work *);
 		static void flysky_timer_handler(k_timer *);
 		
 		static void drone_work_handler(k_work *);
 		static void drone_timer_handler(k_timer *);
 		
+	//*	
 		static void bmp390_work_handler(k_work *);
 		static void bmp390_timer_handler(k_timer *);
-		
-		static void gnss_data_cb(const device *, const gnss_data *);
-		static void gnss_satellites_cb(const device *, const gnss_satellite *, uint16_t);
+	//*/	
+		//static void gnss_data_cb(const device *, const gnss_data *);
+		//static void gnss_satellites_cb(const device *, const gnss_satellite *, uint16_t);
 		const motor_t *getFrontRight(void);
 		const motor_t *getBackRight(void);
 		const motor_t *getBackLeft(void);
 		const motor_t *getFrontLeft(void);
 		int doSDCardThings(void);
 	private:
-		SDCard sdcard;
+//		SDCard sdcard;
 
 		static const motor_t front_right;	
 		static const motor_t back_right;
@@ -117,10 +117,10 @@ class RbosDrone
 		static FlySky flysky;
 		static flysky_data_t flysky_data;
 		
-		static navigation_data nav_data;
-		static gnss_satellite satellites;
+		//static navigation_data nav_data;
+		//static gnss_satellite satellites;
 
-		k_mutex gnss_mutex;
+		//k_mutex gnss_mutex;
 		k_mutex pressure_mutex;
 
 		MPU6050 mpu6050;
@@ -140,8 +140,8 @@ class RbosDrone
 		void calculatePID(void);
 		void doDroneThings();
 		
-		void gnssCapture(navigation_data *);
-		void gnssPrint(navigation_data *);
+		//void gnssCapture(navigation_data *);
+		//void gnssPrint(navigation_data *);
 };
 
 #endif

@@ -1,20 +1,20 @@
 #include "rbfc.h"
 #include "mpu6050.h"
-#include "zsdcard.h"
+//#include "zsdcard.h"
 
 RbosDrone *RbosDrone::pThis = NULL;
 
 FlySky RbosDrone::flysky = FlySky();
 flysky_data_t RbosDrone::flysky_data = {0};
 
-navigation_data RbosDrone::nav_data = {0};	
-gnss_satellite RbosDrone::satellites = {0};
+//navigation_data RbosDrone::nav_data = {0};	
+//gnss_satellite RbosDrone::satellites = {0};
 
-const device *RbosDrone::bmp390 = DEVICE_DT_GET_ONE(bosch_bmp390);;
+const device *RbosDrone::bmp390 = DEVICE_DT_GET_ONE(bosch_bmp390);
 sensor_value RbosDrone::pressure = {0};;
 
 RbosDrone::RbosDrone() :
-	sdcard(SDCard()),
+//	sdcard(SDCard()),
 	mpu6050(MPU6050()),
 	gyro{0},
 	accel{0},
@@ -22,7 +22,7 @@ RbosDrone::RbosDrone() :
 {
 	pThis = this;
 
-	k_mutex_init(&gnss_mutex);
+	//k_mutex_init(&gnss_mutex);
 	k_mutex_init(&pressure_mutex);
 
 //*
@@ -41,7 +41,7 @@ RbosDrone::RbosDrone() :
   pidcontrol.dGain[yaw] = 0.0;
   pidcontrol.max[yaw]   = 400;
 //*/
-	k_msleep(5000);
+	//k_msleep(5000);
 
 	init();
 }
@@ -62,11 +62,14 @@ void RbosDrone::printImuData(void)
 	mpu6050.printImuData();
 }
 
+/*
 navigation_data *RbosDrone::getNavigationData(void)
 {
 	return &nav_data;	
 }
+//*/
 
+/*
 int gnss_dump_nav_data(char *str, uint16_t strsize, const struct navigation_data *nav_data)
 {
 	int ret;
@@ -89,30 +92,35 @@ int gnss_dump_nav_data(char *str, uint16_t strsize, const struct navigation_data
 
 	return (strsize < ret) ? -ENOMEM : 0;
 }
+//*/
 
+/*
 void RbosDrone::gnssPrint(navigation_data *pnav_data)
 {
 	char nav_str[200] = {0};
 
 	gnss_dump_nav_data(nav_str,100,pnav_data);
 	printf(" <%s> ", nav_str);
-/*	
-	printf(" <%llu %llu %u %u %u> ",
-		pnav_data->latitude,
-		pnav_data->longitude,
-		pnav_data->bearing,
-		pnav_data->speed,
-		pnav_data->altitude
-	);
-//*/
+//	
+//printf(" <%llu %llu %u %u %u> ",
+//	pnav_data->latitude,
+//	pnav_data->longitude,
+//	pnav_data->bearing,
+//	pnav_data->speed,
+//	pnav_data->altitude
+//);
+///
 }
+//*/
 
+/*
 void RbosDrone::gnssCapture(navigation_data *pnav_data)
 {
 	k_mutex_lock(&gnss_mutex, K_FOREVER);
 	memcpy(pnav_data, &nav_data, sizeof(navigation_data)); 
 	k_mutex_unlock(&gnss_mutex);
 }
+//*/
 
 void RbosDrone::imuInit(void)
 {
@@ -120,6 +128,7 @@ void RbosDrone::imuInit(void)
   mpu6050.calcGyroOffsets(true);// TODO: figure out what this does
 }
 
+//*
 void RbosDrone::flysky_work_handler(k_work *work)
 {
 	flysky.capturePulses(&flysky_data);
@@ -133,7 +142,9 @@ void RbosDrone::flysky_timer_handler(k_timer *dummy)
 }
 
 K_TIMER_DEFINE(flysky_timer, RbosDrone::flysky_timer_handler, NULL);
+//*/
 
+//*
 void RbosDrone::bmp390_work_handler(k_work *work)
 {
 	int rc = sensor_sample_fetch(bmp390);
@@ -143,7 +154,6 @@ void RbosDrone::bmp390_work_handler(k_work *work)
 		rc = sensor_channel_get(bmp390, SENSOR_CHAN_PRESS, &pressure);
 	}
 }
-
 K_WORK_DEFINE(bmp390_work, RbosDrone::bmp390_work_handler);
 
 void RbosDrone::bmp390_timer_handler(k_timer *dummy)
@@ -152,7 +162,7 @@ void RbosDrone::bmp390_timer_handler(k_timer *dummy)
 }
 
 K_TIMER_DEFINE(bmp390_timer, RbosDrone::bmp390_timer_handler, NULL);
-
+//*/
 
 void RbosDrone::drone_work_handler(k_work *work)
 {
@@ -175,6 +185,7 @@ void RbosDrone::startWorkers(void)
 	k_timer_start(&drone_timer, K_MSEC(DRONE_SAMPLE_TIME_MS), K_MSEC(DRONE_SAMPLE_TIME_MS));
 }
 
+/*
 void RbosDrone::gnss_data_cb(const device *dev, const gnss_data *data)
 {
 	uint64_t timepulse_ns;
@@ -191,8 +202,10 @@ void RbosDrone::gnss_data_cb(const device *dev, const gnss_data *data)
 
 	memcpy(pThis->getNavigationData(), &data->nav_data,sizeof(navigation_data));
 }
+//*/
 
 #if CONFIG_GNSS_SATELLITES
+/*
 void RbosDrone::gnss_satellites_cb(
 		const device *dev, const gnss_satellite *satellites, uint16_t size)
 {
@@ -201,11 +214,10 @@ void RbosDrone::gnss_satellites_cb(
 	for (unsigned int i = 0; i != size; ++i) {
 		tracked_count += satellites[i].is_tracked;
 	}
-/*
-	printf("\n%u satellite%s reported (of which %u tracked)!\n",
-		size, size > 1 ? "s" : "", tracked_count);
-//*/
+//	printf("\n%u satellite%s reported (of which %u tracked)!\n",
+//		size, size > 1 ? "s" : "", tracked_count);
 }
+//*/
 #endif
 
 void RbosDrone::gnssInit(void)
@@ -289,7 +301,7 @@ void RbosDrone::init()
 	//doSDCardThings();
 
 	imuInit();
-  gyro.refNose = gyro.angleZ;
+ // gyro.refNose = gyro.angleZ;
 
 	// GPS setup
 	//gnssInit();	
@@ -326,20 +338,19 @@ void RbosDrone::doImuThings(void)
 
 	accel.acc_roll = mpu6050.getAccAngleX();
 	accel.acc_pitch = mpu6050.getAccAngleY();
-	
-	mpu6050.printConditionedImuData();
 }
 
 void RbosDrone::doGnssThings(void)
 {
-	navigation_data data = {0};
-	gnssCapture(&data);
-	gnssPrint(&data);
+	//navigation_data data = {0};
+//	gnssCapture(&data);
+//	gnssPrint(&data);
 }
 
 void RbosDrone::doFlySkyThings(void)
 {
 	flysky.printPulses(&flysky_data);
+	mpu6050.printConditionedImuData();
 }
 
 void RbosDrone::calculatePID(void)
@@ -365,22 +376,24 @@ void RbosDrone::doDroneThings()
 	capturePressure(&captured_pressure);
 	printf(" (%u.%u kPa) ", captured_pressure.val1, captured_pressure.val2);
 	// calculate P(ID)
-	calculatePID();
+//	calculatePID();
 	// if loop time >= 4ms go into next then calculate stuff for next loop
 	//
-	updateMotors(); 
+//	updateMotors(); 
 }
 
+//*
 void RbosDrone::capturePressure(sensor_value *p_pressure)
 {
 	k_mutex_lock(&pressure_mutex, K_FOREVER);
 	memcpy(p_pressure, &pressure, sizeof(sensor_value));	
 	k_mutex_unlock(&pressure_mutex);
 }
+//*/
 
+//*
 int RbosDrone::process_bmp390(const struct device *dev)
 {
-//*
 	//struct sensor_value pressure;
 	int rc = sensor_sample_fetch(dev);
 
@@ -390,7 +403,7 @@ int RbosDrone::process_bmp390(const struct device *dev)
 	}
 	//printf(".");
 	//printf("pressure: %u.%u kPa\n", pressure.val1, pressure.val2);
-//*/
 	//return 0;
 	return rc;
 }
+//*/

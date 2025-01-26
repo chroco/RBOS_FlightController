@@ -1,7 +1,5 @@
-#BOARD= esp_wrover_kit/esp32/procpu
-BOARD= esp32_devkitc_wroom/esp32/procpu
-#BOARD= esp_wrover_kit/esp32/procpu
-#BOARD= esp32s3_devkitc/esp32s3/appcpu
+BOARD= teensy41
+#BOARD= esp32_devkitc_wroom/esp32/procpu
 OPTIONS= -p always 
 BUILD_DIR= build/
 ESPTOOL= /home/chroco/zephyr/zephyr-workspace/modules/hal/espressif/tools/esptool_py/esptool.py
@@ -14,16 +12,15 @@ OVERLAY= esp32_devkitc_wroom_procpu.overlay
 BIN= /home/chroco/zephyr/blinky/build/mcuboot/zephyr/zephyr.bin
 ARGS= --port $(PORT) --chip auto --baud $(BAUD) --before default_reset --after hard_reset write_flash $(FORCE) -u --flash_mode $(MODE) --flash_freq 40m --flash_size detect 0x0000
 
-.PHONY: all write mcuboot clean
+.PHONY: all write esp32_erase clean
 
 all: clean
-	@west build -b $(BOARD) . # --sysbuild .
+	@west build $(OPTION)-b $(BOARD) . # --sysbuild .
 
 write: 
-	@west flash --runner esp32 
-#$(ESPTOOL) $(ARGS) $(BIN)
+	@west flash 
 
-erase:
+esp32_erase:
 	$(ESPTOOL) erase_flash
 
 clean:

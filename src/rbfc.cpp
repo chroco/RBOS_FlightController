@@ -1,5 +1,6 @@
 #include "rbfc.h"
 #include "mpu6050.h"
+#include "zsdcard.h"
 
 RbosDrone *RbosDrone::pThis = NULL;
 
@@ -13,6 +14,7 @@ const device *RbosDrone::bmp390 = DEVICE_DT_GET_ONE(bosch_bmp390);;
 sensor_value RbosDrone::pressure = {0};;
 
 RbosDrone::RbosDrone() :
+	sdcard(SDCard()),
 	mpu6050(MPU6050()),
 	gyro{0},
 	accel{0},
@@ -47,6 +49,12 @@ RbosDrone::RbosDrone() :
 RbosDrone::~RbosDrone() 
 {
 
+}
+
+int RbosDrone::doSDCardThings(void)
+{
+	
+	return 0;// oops doSDCardThings();
 }
 
 void RbosDrone::printImuData(void)
@@ -278,7 +286,9 @@ const motor_t *RbosDrone::getFrontLeft(void)
 
 void RbosDrone::init()
 {
-	//imuInit();
+	//doSDCardThings();
+
+	imuInit();
   gyro.refNose = gyro.angleZ;
 
 	// GPS setup

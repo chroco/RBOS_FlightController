@@ -22,7 +22,6 @@ int main(void)
 
 	while(1)
 	{
-		//rbosDrone.do_things();
 		
 		k_msleep(1000);
 	}

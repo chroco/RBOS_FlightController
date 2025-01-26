@@ -23,12 +23,6 @@ write:
 	@west flash --runner esp32 
 #$(ESPTOOL) $(ARGS) $(BIN)
 
-mcuboot:
-	@west build -b $(BOARD) -DDTC_OVERLAY_FILE=$(OVERLAY) --sysbuild $(ZEPHYR_BASE)/samples/sysbuild/with_mcuboot
-
-blinky:
-	@west build -b $(BOARD)  --sysbuild $(ZEPHYR_BASE)/samples/basic/rgb_led
-
 erase:
 	$(ESPTOOL) erase_flash
 

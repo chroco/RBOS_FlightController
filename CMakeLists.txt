@@ -12,6 +12,7 @@ target_include_directories(app
 	PRIVATE 
 		src
 		ext/flysky_fs16x/src
+		ext/ZephyrSDCard/src
 )
 
 target_sources(app 
@@ -19,8 +20,8 @@ target_sources(app
 		src/blinky.c
 		#src/rbpid.cpp
 		ext/flysky_fs16x/src/flysky_fs16x.cpp
+		ext/ZephyrSDCard/src/zsdcard.cpp
 		src/mpu6050.cpp
 		src/rbfc.cpp
 		src/main.cpp
-
 )

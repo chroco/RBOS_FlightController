@@ -2,12 +2,15 @@
 #define _RBFC_H_
 
 #include <stdio.h>
-#include "mpu6050.h"
 #include <zephyr/drivers/gnss.h>
-#include "flysky_fs16x.h"
 #include <zephyr/drivers/i2c.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/pwm.h>
+#include <zephyr/logging/log.h>
+
+#include "mpu6050.h"
+#include "flysky_fs16x.h"
+#include "zsdcard.h"
 
 #define FLYSKY_SAMPLE_TIME_MS		4
 #define BMP390_SAMPLE_TIME_MS		5
@@ -93,7 +96,10 @@ class RbosDrone
 		const motor_t *getBackRight(void);
 		const motor_t *getBackLeft(void);
 		const motor_t *getFrontLeft(void);
+		int doSDCardThings(void);
 	private:
+		SDCard sdcard;
+
 		static const motor_t front_right;	
 		static const motor_t back_right;
 		static const motor_t back_left;

@@ -7,8 +7,6 @@
 		receiver3 = &receiver3;
 		receiver4 = &receiver4;
 		receiver5 = &receiver5;
-//		servo0 = &servo0;
-		gnss = &gnss;
 	};
 
 	pwm_loopback_0 {
@@ -22,7 +20,6 @@
 		compatible = "gpio-leds";
 		led0: led_0 {
 			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
-			//gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
 			label = "LED 0";
 		};
 	};
@@ -30,14 +27,14 @@
 	receiver {
 		compatible = "gpio-keys";
 
-		receiver0: receiver_0 { // roll
-			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>; // pin 36
+		receiver0: receiver_0 {                 // roll
+			gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;  // pin 36
       zephyr,code = <INPUT_KEY_0>;
 			label = "Receiver 0";
 		};
 
 		receiver1: receiver_1 { // pitch
-			gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>; // pin 39
+			gpios = <&gpio1 7 GPIO_ACTIVE_HIGH>;  // pin 39
       zephyr,code = <INPUT_KEY_1>;
 			label = "Receiver 1";
 		};
@@ -95,17 +92,6 @@
 	};
 };
 
-&uart2 {
-	status = "okay";
-	current-speed = <115200>;
-
-	gnss: u-blox,m8 {
-		status = "okay";
-		compatible = "u-blox,m8";
-		uart-baudrate = <115200>;
-	};
-};
-
 &pinctrl {
 	mcpwm0_default: mcpwm0_default {
 		group1 {
@@ -146,21 +132,3 @@
 		label = "BMP390";
 	};
 };
-
-&spi3 {
-	status = "okay";
-	cs-gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
-
-	sdhc2: sdhc@0 {
-		compatible = "zephyr,sdhc-spi-slot";
-		reg = <0>;
-		status = "okay";
-		mmc {
-			compatible = "zephyr,sdmmc-disk";
-			disk-name = "SD";
-			status = "okay";
-		};
-		spi-max-frequency = <24000000>;
-	};
-};
-

@@ -26,9 +26,7 @@ endif()
 target_sources(app 
 	PRIVATE 
 		src/blinky.c
-		#src/rbpid.cpp
 		ext/flysky_fs16x/src/flysky_fs16x.cpp
-		#ext/ZephyrSDCard/src/zsdcard.cpp
 		ext/ZephyrMPU6050/src/mpu6050.cpp
 		src/rbfc.cpp
 		src/main.cpp

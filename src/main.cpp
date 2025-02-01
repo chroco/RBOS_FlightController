@@ -1,7 +1,11 @@
 /*
- * Copyright (c) 2024 Open Pixel Systems
+ *  It is not so very important for a person to learn facts. 
+ *  For that he does not really need a college. He can learn 
+ *  them from books. The value of an education ... is not the 
+ *  learning of many facts, but the training of the mind to think 
+ *  something that cannot be learned from textbooks.”
  *
- * SPDX-License-Identifier: Apache-2.0
+ *                                -Einstein
  */
 
 #include "blinky.h"

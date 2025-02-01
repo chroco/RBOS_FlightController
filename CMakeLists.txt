@@ -22,12 +22,12 @@ if(CONFIG_TEENSY41)
 	)
 endif()
 
-
 target_sources(app 
 	PRIVATE 
 		src/blinky.c
 		ext/flysky_fs16x/src/flysky_fs16x.cpp
 		ext/ZephyrMPU6050/src/mpu6050.cpp
+    src/RBPID.cpp
 		src/rbfc.cpp
 		src/main.cpp
 )

@@ -126,7 +126,8 @@ void loop()
   calculate_pid(myPID, myKalman, myGyro, myAccel);
 
   ///Motor Start and Stop
-  if (motor_start == 0 && receiver_input[0] < 1050 && receiver_input[1] < 1050 && receiver_input[2] < 1050 && receiver_input[3] > 1950)
+  if (motor_start == 0 && receiver_input[0] < 1050 && 
+      receiver_input[1] < 1050 && receiver_input[2] < 1050 && receiver_input[3] > 1950)
   {
     mpu6050.calcGyroOffsets(true);
     myGyro.rateCalibration[0] -= mpu6050.getGyroYoffset();
@@ -135,11 +136,13 @@ void loop()
 
     motor_start = 1;
   }
-  if (motor_start == 0 && receiver_input[0] < 1050 && receiver_input[1] > 1950 && receiver_input[2] < 1050 && receiver_input[3] > 1950)
+  if (motor_start == 0 && receiver_input[0] < 1050 && 
+      receiver_input[1] > 1950 && receiver_input[2] < 1050 && receiver_input[3] > 1950)
   {
     motor_start = 1;
   }
-  if (motor_start == 1 && receiver_input[0] < 1050 && receiver_input[1] > 1950 && receiver_input[2] < 1050 && receiver_input[3] < 1050)
+  if (motor_start == 1 && receiver_input[0] < 1050 && 
+      receiver_input[1] > 1950 && receiver_input[2] < 1050 && receiver_input[3] < 1050)
   {
     motor_start = 0;
   }

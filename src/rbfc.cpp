@@ -350,7 +350,6 @@ void RbosDrone::doGnssThings(void)
 void RbosDrone::doFlySkyThings(void)
 {
 	flysky.printPulses(&flysky_data);
-	mpu6050.printConditionedImuData();
 }
 
 void RbosDrone::calculatePID(void)
@@ -371,10 +370,11 @@ void RbosDrone::doDroneThings()
 	// capture
 	doFlySkyThings();
 
+	mpu6050.printConditionedImuData();
 	// correct controller values
 	sensor_value captured_pressure = {0};
 	capturePressure(&captured_pressure);
-	printf(" (%u.%u kPa) ", captured_pressure.val1, captured_pressure.val2);
+	printk(" (%u.%u kPa) ", captured_pressure.val1, captured_pressure.val2);
 	// calculate P(ID)
 //	calculatePID();
 	// if loop time >= 4ms go into next then calculate stuff for next loop

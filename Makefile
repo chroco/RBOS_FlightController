@@ -1,5 +1,5 @@
-BOARD= teensy41
-#BOARD= esp32_devkitc_wroom/esp32/procpu
+#BOARD= teensy41
+BOARD= esp32_devkitc_wroom/esp32/procpu
 OPTIONS= -p always 
 BUILD_DIR= build/
 ESPTOOL= /home/chroco/zephyr/zephyr-workspace/modules/hal/espressif/tools/esptool_py/esptool.py
@@ -22,6 +22,9 @@ write:
 
 esp32_erase:
 	$(ESPTOOL) erase_flash
+
+monitor:
+	@west espressif monitor
 
 clean:
 	@rm -rf $(BUILD_DIR)/*

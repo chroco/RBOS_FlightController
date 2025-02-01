@@ -6,9 +6,12 @@
 # tree, you cannot use them in your own application.
 #source "samples/subsys/usb/common/Kconfig.sample_usbd"
 
-
 config TEENSY41
 	bool "If you're using a Teensy 4.1"
+	default n
+
+config USING_ZEPHYR
+	bool "If you're using Zephyr instead of Arduino"
 	default n
 
 source "Kconfig.zephyr"

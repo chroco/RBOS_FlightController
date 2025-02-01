@@ -1,12 +1,17 @@
 #include "RBPID.h"
+#include <math.h>
+//#include "MPU6050_tockn_RB.h"
+
+#if !defined CONFIG_USING_ZEPHYR
 #include <Arduino.h>
 #include <ESP32Servo.h>
-#include "MPU6050_tockn_RB.h"
-#include <math.h>
+#else
+#include <ctype.h>
+#endif
 
 void getVoltageCompensation(voltMeter_t &meter)
 {
-  meter.batteryVoltage = double(analogReadMilliVolts(voltMeterPin)) / 1000.0 * 11.0;
+  //meter.batteryVoltage = double(analogReadMilliVolts(voltMeterPin)) / 1000.0 * 11.0;
   //meter.analogIn = analogRead(voltMeterPin);
   //meter.TEMP = map(meter.analogIn, 0, 4095, 0, 8);
   //meter.TEMP = map(meter.analogIn, 0, 3300, 0, 8);
@@ -56,6 +61,7 @@ void setPID(PID_t &pid, const char opt)
   }
 }
 
+/*
 void getIMU(MPU6050 mpu6050, gyro_t &gyro, accel_t &accel)
 {
   mpu6050.update();
@@ -70,18 +76,52 @@ void getIMU(MPU6050 mpu6050, gyro_t &gyro, accel_t &accel)
   accel.ang[0] = double(mpu6050.getAccAngleX());
   accel.ang[1] = double(mpu6050.getAccAngleY());
 }
+//*/
 
-void kalman_1d(kalman_t &kalman, double KalmanState, double KalmanUncertainty, double KalmanInput, double KalmanMeasurement)
+/*
+void kalman_nd(
+    nkalman_t nkalman[], 
+    double KalmanState, 
+    double KalmanUncertainty, 
+    double KalmanInput, 
+    double KalmanMeasurement
+  )
+{
+  double KalmanGain;
+
+  uint16_t n = sizeof(kalman) / sizeof(kalman_t);
+  
+  for(int i = 0; i < n; ++i)
+  {
+    KalmanState = KalmanState + 0.004 * KalmanInput;
+    KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+    KalmanGain = KalmanUncertainty / (KalmanUncertainty + 3 * 3);
+    KalmanState = KalmanState+KalmanGain * (KalmanMeasurement - KalmanState);
+    KalmanUncertainty = (1 - KalmanGain) * KalmanUncertainty;
+    nkalman[i].output = KalmanState; 
+    nkalman[i + 1].output = KalmanUncertainty;
+  }
+}
+//*/
+
+//*
+void kalman_1d(
+    kalman_t &kalman, 
+    double KalmanState, 
+    double KalmanUncertainty, 
+    double KalmanInput, 
+    double KalmanMeasurement)
 {
   double KalmanGain;
   KalmanState = KalmanState + 0.004 * KalmanInput;
   KalmanUncertainty = KalmanUncertainty + 0.004 * 0.004 * 4 * 4;
-  KalmanGain = KalmanUncertainty * 1 / (1 * KalmanUncertainty + 3 * 3);
+  KalmanGain = KalmanUncertainty / (KalmanUncertainty + 3 * 3);
   KalmanState = KalmanState+KalmanGain * (KalmanMeasurement - KalmanState);
   KalmanUncertainty = (1 - KalmanGain) * KalmanUncertainty;
   kalman.kalmanOutput[0] = KalmanState; 
   kalman.kalmanOutput[1] = KalmanUncertainty;
 }
+//*/
 
 void calculate_pid(PID_t &myPID, kalman_t myKalman, gyro_t myGyro, accel_t myAccel)
 {
@@ -98,7 +138,7 @@ void calculate_pid(PID_t &myPID, kalman_t myKalman, gyro_t myGyro, accel_t myAcc
   {
     myPID.errorRate[i] = myPID.desiredRate[i] - myGyro.rotationRate[i];
     pid_equation(myPID, myPID.errorRate[i], myPID.PRateGain[i], myPID.IRateGain[i], myPID.DRateGain[i], myPID.prevErrorRate[i], myPID.prevITermRate[i]);
-    myPID.final[i] = myPID.PIDReturn[0];
+    myPID.finalValue[i] = myPID.PIDReturn[0];
     myPID.prevErrorRate[i] = myPID.PIDReturn[1];
     myPID.prevITermRate[i] = myPID.PIDReturn[2];
   }
@@ -173,6 +213,6 @@ void printReport(voltMeter_t meter, PID_t pid, kalman_t kalman, int ESCtimer[], 
                                   , ESCtimer[3]);
   Serial.printf("%d\n", loopTime);
   */
-  Serial.printf("%0.2f, ", meter.batteryVoltage);
-  Serial.printf("\n");
+  //Serial.printf("%0.2f, ", meter.batteryVoltage);
+  //Serial.printf("\n");
 }

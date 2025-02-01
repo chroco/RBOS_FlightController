@@ -1,11 +1,11 @@
-#ifndef RB_PID_H_
-#define RB_PID_H_
+#ifndef _RB_PID_H_
+#define _RB_PID_H_
 
+#if !CONFIG_USING_ZEPHYR
 #pragma once
 #include <Arduino.h>
 #include <ESP32Servo.h>
 #include "MPU6050_tockn_RB.h"
-#include <math.h>
 
 #define chan1Pin 35///Roll
 #define chan2Pin 34///Pitch
@@ -16,10 +16,16 @@
 #define motorBLPin 26
 #define motorFLPin 25
 #define voltMeterPin 13
+#endif
+
+#include <math.h>
 
 #define MAX_THROTTLE 1800
+#define MAX_ESC_OUT 2000
+#define MIN_ESC_OUT 1100
 #define MAX_PID 200
 #define MAX_YAW 200
+#define MOTOR_OFF 1000
 
 ///Data Structs
 struct accel_t
@@ -34,17 +40,28 @@ struct gyro_t
   double rateCalibration[3];
 };
 
+//*
 struct kalman_t
 {
   double kalmanAngle[2];
   double kalmanUncertaintyAngle[2];
   double kalmanOutput[2];
 };
+//*/
+
+/*
+struct nkalman_t
+{
+  double input;
+  double uncertainty;
+  double output;
+};
+//*/
 
 struct PID_t
 {
   double PIDReturn[3];
-  double final[3];
+  double finalValue[3];
   double desiredRate[3];
   double desiredAngle[3];
   double errorRate[3];
@@ -63,20 +80,20 @@ struct PID_t
 
 struct voltMeter_t
 {
-  uint32_t analogIn;
+  //uint32_t analogIn;
   double batteryVoltage;
   int ESCcompensation;
-  int TEMP;
+  //int TEMP;
 };
 
 void getVoltageCompensation(voltMeter_t &meter);
 void setPID(PID_t &pid, const char opt);
 void calculate_pid(PID_t &myPID, kalman_t myKalman, gyro_t myGyro, accel_t myAccel);
-void getIMU(MPU6050 IMU, gyro_t &gyro, accel_t &accel);
+void getIMU(gyro_t &gyro, accel_t &accel);
+//void getIMU(MPU6050 IMU, gyro_t &gyro, accel_t &accel);
 void kalman_1d(kalman_t &kalman, double KalmanState, double KalmanUncertainty, double KalmanInput, double KalmanMeasurement);
 void pid_equation(PID_t &pid, double Error, double P , double I, double D, double PrevError, double PrevIterm);
 void correctInput(int receiver_input[], int corrected_input[]);
 void printReport(voltMeter_t meter, PID_t pid, kalman_t kalman, int ESCtimer[], accel_t accel, gyro_t gyro, int corrected_input[], int loopTime);
-
 
 #endif

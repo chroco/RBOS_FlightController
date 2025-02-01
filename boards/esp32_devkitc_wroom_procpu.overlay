@@ -9,14 +9,11 @@
 		receiver5 = &receiver5;
 	};
 
-	pwm_loopback_0 {
-		compatible = "test-pwm-loopback";
-		/* first index must be a 32-Bit timer */
-		pwms = <&mcpwm0 0 0 PWM_POLARITY_NORMAL>,
-		       <&mcpwm0 6 0 PWM_POLARITY_NORMAL>;
+  zephyr,user {
+		io-channels = <&adc1 4>;
 	};
 
-	leds {
+  leds {
 		compatible = "gpio-leds";
 		led0: led_0 {
 			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
@@ -89,6 +86,21 @@
 			min-pulse = <PWM_USEC(1000)>;
 			max-pulse = <PWM_USEC(2000)>;
 		};
+	};
+};
+
+&adc1 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@4 {
+		reg = <4>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		//zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 4000)>;
+		zephyr,resolution = <12>;
 	};
 };
 
